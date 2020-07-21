@@ -4,15 +4,14 @@ using UnityEngine;
 
 public class EndingPoint : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [Header("Options")]
+    public GameObject indiactor;
 
-    // Update is called once per frame
-    void Update()
+    public void OnTriggerEnter(Collider other)
     {
-        
+        if (other.tag == "Player")
+        {
+            indiactor.SetActive(true);
+        }
     }
 }
