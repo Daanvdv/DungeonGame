@@ -7,18 +7,18 @@ public class Node
 {
     private List<Node> childNodes;
 
-    public List<Node> childNodesList { get => childNodes; }
+    public List<Node> ChildNodesList { get => childNodes; }
 
-    public bool visited { get; set; }
+    public bool Visited { get; set; }
 
-    public Node parentNode { get; set; }
+    public Node ParentNode { get; set; }
 
-    public int depthIndex { get; set; }
+    public int DepthIndex { get; set; }
 
     public Node(Node parentNode)
     {
         childNodes = new List<Node>();
-        this.parentNode = parentNode;
+        this.ParentNode = parentNode;
         if (parentNode != null)
         {
             parentNode.AddChild(this);

@@ -18,6 +18,6 @@ public class RoomNode : Node
     {
         this.Size = size;
         this.Position = position;
-        this.depthIndex = depth;
+        this.DepthIndex = depth;
     }
 }

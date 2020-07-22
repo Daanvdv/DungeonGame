@@ -61,7 +61,7 @@ public class DungeonGeneration : MonoBehaviour
     {
         //Setup first node and node list
         nodeList = new List<Node>();
-        List<RoomNode> roomList = new List<RoomNode>();
+        roomList = new List<RoomNode>();
         RoomNode rootNode = new RoomNode(new Vector2Int(0, 0), dungeonSize, 0, null);
         nodeList.Add(rootNode);
         roomList.Add(rootNode);
@@ -130,7 +130,7 @@ public class DungeonGeneration : MonoBehaviour
             roomList.Add(nodeOne);
             roomList.Add(nodeTwo);
 
-            rootNode.visited = true;
+            rootNode.Visited = true;
             roomList.Remove(rootNode);
 
             //Set new root node
@@ -150,7 +150,10 @@ public class DungeonGeneration : MonoBehaviour
         foreach (RoomNode roomNode in roomList)
         {
             //TODO: Cut rooms spaces down to leave gaps inbteween for corridors
-            GameObject room = Instantiate(roomPrefab, new Vector3(roomNode.Position.x, 0.0f, roomNode.Position.y), roomPrefab.transform.rotation, this.transform);
+            GameObject room = Instantiate(roomPrefab,
+                new Vector3(roomNode.Position.x, 0.0f, roomNode.Position.y),
+                roomPrefab.transform.rotation,
+                this.transform);
             room.transform.localScale = new Vector3(roomNode.Size.x, roomPrefab.transform.localScale.y, roomNode.Size.y);
             NodeInfo info = room.AddComponent<NodeInfo>();
             info.pos = roomNode.Position;
@@ -166,7 +169,7 @@ public class DungeonGeneration : MonoBehaviour
     /// <param name="width">Width of hallways.</param>
     private void CreateHallways(int width)
     {
-
+        
     }
 
     /// <summary>
