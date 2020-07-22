@@ -282,25 +282,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
         type: 3}
-      propertyPath: maxIterations
-      value: 15
-      objectReference: {fileID: 0}
-    - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
-        type: 3}
-      propertyPath: seed
-      value: 6232
-      objectReference: {fileID: 0}
-    - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
-        type: 3}
       propertyPath: corridorPrefab
       value: 
       objectReference: {fileID: 7553684648177792973, guid: cd388f75a8de63b4181a9f6673dfefea,
-        type: 3}
-    - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
-        type: 3}
-      propertyPath: hallwayPrefab
-      value: 
-      objectReference: {fileID: 9006073204550039096, guid: edd1983333798b7458ab3479d699016a,
         type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 73c832680c8dfd3438637d5884086e4b, type: 3}

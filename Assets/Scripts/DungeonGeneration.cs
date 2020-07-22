@@ -169,7 +169,28 @@ public class DungeonGeneration : MonoBehaviour
     /// <param name="width">Width of hallways.</param>
     private void CreateHallways(int width)
     {
-        
+        hallways = new List<GameObject>();
+
+        //Get start point and distance to travel in x and y
+        Vector2Int roomDistance = roomList[0].Position - roomList[roomList.Count-1].Position;
+        roomDistance = new Vector2Int(Math.Abs(roomDistance.x), Math.Abs(roomDistance.y));
+        int hallwayOneEnd = roomList[0].Position.x + roomDistance.x;
+
+        //Create hallway sepertly through taxicab geometry (first go via x then y)
+        //TODO: Add overlap reduction with room spaces
+        GameObject hallwayOne = Instantiate(hallwayPrefab,
+            new Vector3(roomList[0].Position.x, hallwayPrefab.transform.position.y, roomList[0].Position.y),
+            hallwayPrefab.transform.rotation,
+            this.transform);
+        hallwayOne.transform.localScale = new Vector3(roomDistance.x, hallwayPrefab.transform.localScale.y, width);
+        GameObject hallwayTwo = Instantiate(hallwayPrefab,
+            new Vector3(hallwayOneEnd, hallwayPrefab.transform.position.y, roomList[0].Position.y),
+            hallwayPrefab.transform.rotation,
+            this.transform);
+        hallwayTwo.transform.localScale = new Vector3(width, hallwayPrefab.transform.localScale.y, roomDistance.y);
+
+        hallways.Add(hallwayOne);
+        hallways.Add(hallwayTwo);
     }
 
     /// <summary>
