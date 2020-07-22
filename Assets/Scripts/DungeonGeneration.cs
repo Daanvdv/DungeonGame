@@ -8,6 +8,8 @@ public class DungeonGeneration : MonoBehaviour
     [Header("Prefabs")]
     public GameObject startPoint;
     public GameObject endPoint;
+    public GameObject roomPrefab;
+    public GameObject hallwayPrefab;
 
     [Header("Dungeon Settings")]
     public Vector2Int dungeonSize;
@@ -19,6 +21,9 @@ public class DungeonGeneration : MonoBehaviour
     public int seed;
 
     private List<Node> nodeList;
+    private List<RoomNode> roomList;
+    private List<GameObject> rooms;
+    private List<GameObject> hallways;
 
     enum TileType
     {
@@ -56,23 +61,15 @@ public class DungeonGeneration : MonoBehaviour
     {
         //Setup first node and node list
         nodeList = new List<Node>();
-        List<RoomNode> roomNodesToCut = new List<RoomNode>();
+        List<RoomNode> roomList = new List<RoomNode>();
         RoomNode rootNode = new RoomNode(new Vector2Int(0, 0), dungeonSize, 0, null);
         nodeList.Add(rootNode);
-        roomNodesToCut.Add(rootNode);
-
-        //Visualisation
-        NodeInfo nodeInfoR;
-        GameObject rootNodeGO = new GameObject("Node0");
-        rootNodeGO.transform.position = new Vector3(rootNode.Position.x, 0.0f, rootNode.Position.y);
-        nodeInfoR = rootNodeGO.AddComponent<NodeInfo>();
-        nodeInfoR.size = rootNode.Size;
-        nodeInfoR.pos = rootNode.Position;
+        roomList.Add(rootNode);
 
         ///TODO: Make index increment only once the tree goes down another layer
         int index = 1;
 
-        for (int i = 1; i < maxIterations; i++)
+        for (int i = 0; i < maxIterations; i++)
         {
             //Declare nodes and variables to be assigned
             RoomNode nodeOne;
@@ -101,17 +98,12 @@ public class DungeonGeneration : MonoBehaviour
             if (cutType == CutType.x)
             {
                 //Choose a random postion between the current root nodes position and size to split and set the child nodes within
-                int cutPosX = UnityEngine.Random.Range(minRoomSize.x, rootNode.Size.x);
-
-                if (cutPosX < minRoomSize.x || rootNode.Size.x - cutPosX < minRoomSize.x)
-                {
-                    continue;
-                }
+                int cutPosX = UnityEngine.Random.Range(minRoomSize.x, rootNode.Size.x - minRoomSize.x);
 
                 //Calculate the cut and the size of the new room
-                nodeTwoPos = new Vector2Int(cutPosX, rootNode.Position.y);
                 nodeOneSize = new Vector2Int(cutPosX, rootNode.Size.y);
                 nodeTwoSize = new Vector2Int(rootNode.Size.x - cutPosX, rootNode.Size.y);
+                nodeTwoPos = new Vector2Int(rootNode.Position.x + nodeOneSize.x, rootNode.Position.y);
 
                 nodeOne = new RoomNode(rootNode.Position, nodeOneSize, index, rootNode);
                 nodeTwo = new RoomNode(nodeTwoPos, nodeTwoSize, index, rootNode);
@@ -119,57 +111,30 @@ public class DungeonGeneration : MonoBehaviour
             else
             {
                 //Choose a random postion between the current root nodes position and size to split and set the child nodes within
-                int cutPosY = UnityEngine.Random.Range(minRoomSize.y, rootNode.Size.y);
-
-                if (cutPosY < minRoomSize.y || rootNode.Size.y - cutPosY < minRoomSize.y)
-                {
-                    continue;
-                }
+                int cutPosY = UnityEngine.Random.Range(minRoomSize.y, rootNode.Size.y - minRoomSize.y);
 
                 //Calculate the size and postion of the new rooms
-                nodeTwoPos = new Vector2Int(rootNode.Position.x, cutPosY);
                 nodeOneSize = new Vector2Int(rootNode.Size.x, cutPosY);
                 nodeTwoSize = new Vector2Int(rootNode.Size.x, rootNode.Size.y - cutPosY);
+                nodeTwoPos = new Vector2Int(rootNode.Position.x, rootNode.Position.y + nodeOneSize.y);
 
                 nodeOne = new RoomNode(rootNode.Position, nodeOneSize, index, rootNode);
                 nodeTwo = new RoomNode(nodeTwoPos, nodeTwoSize, index, rootNode);
             }
-
-            //Visualisation
-            NodeInfo nodeInfo;
-            GameObject nodeOneGO = new GameObject("Node1");
-            nodeOneGO.transform.position = new Vector3(nodeOne.Position.x, 0.0f, nodeOne.Position.y);
-            nodeOneGO.transform.parent = rootNodeGO.transform;
-            nodeInfo = nodeOneGO.AddComponent<NodeInfo>();
-            nodeInfo.size = nodeOne.Size;
-            nodeInfo.pos = nodeOne.Position;
-            GameObject nodeTwoGO = new GameObject("Node2");
-            nodeTwoGO.transform.position = new Vector3(nodeTwo.Position.x, 0.0f, nodeOne.Position.y);
-            nodeTwoGO.transform.parent = rootNodeGO.transform;
-            nodeInfo = nodeTwoGO.AddComponent<NodeInfo>();
-            nodeInfo.size = nodeTwo.Size;
-            nodeInfo.pos = nodeTwo.Position;
 
             //Add new rooms as children to the root then move on to the next root node
             nodeList.Add(nodeOne);
             nodeList.Add(nodeTwo);
             rootNode.AddChild(nodeOne);
             rootNode.AddChild(nodeTwo);
-            roomNodesToCut.Add(nodeOne);
-            roomNodesToCut.Add(nodeTwo);
+            roomList.Add(nodeOne);
+            roomList.Add(nodeTwo);
 
             rootNode.visited = true;
-            roomNodesToCut.Remove(rootNode);
+            roomList.Remove(rootNode);
 
             //Set new root node
-            rootNode = roomNodesToCut[0];
-
-            //Visualisation
-            rootNodeGO.transform.parent = nodeOneGO.transform;
-            rootNodeGO.transform.position = new Vector3(rootNode.Position.x, 0.0f, rootNode.Position.y);
-            nodeInfoR = rootNodeGO.AddComponent<NodeInfo>();
-            nodeInfoR.size = rootNode.Size;
-            nodeInfoR.pos = rootNode.Position;
+            rootNode = roomList[0];
         }
     }
 
@@ -180,7 +145,18 @@ public class DungeonGeneration : MonoBehaviour
     /// <param name="minimumSize">Minium size of rooms</param>
     private void CreateRooms(Vector2Int minimumSize)
     {
-        
+        //Spawn rooms as planes
+        rooms = new List<GameObject>();
+        foreach (RoomNode roomNode in roomList)
+        {
+            //TODO: Cut rooms spaces down to leave gaps inbteween for corridors
+            GameObject room = Instantiate(roomPrefab, new Vector3(roomNode.Position.x, 0.0f, roomNode.Position.y), roomPrefab.transform.rotation, this.transform);
+            room.transform.localScale = new Vector3(roomNode.Size.x, roomPrefab.transform.localScale.y, roomNode.Size.y);
+            NodeInfo info = room.AddComponent<NodeInfo>();
+            info.pos = roomNode.Position;
+            info.size = roomNode.Size;
+            rooms.Add(room);
+        }
     }
 
     //TODO: Add create hallways between rooms within sections and then connect those hallways that have been created
