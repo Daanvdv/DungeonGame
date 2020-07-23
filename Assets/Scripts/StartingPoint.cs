@@ -10,7 +10,7 @@ public class StartingPoint : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Instantiate(player);
+        Instantiate(player, this.transform);
     }
 
     // Update is called once per frame
