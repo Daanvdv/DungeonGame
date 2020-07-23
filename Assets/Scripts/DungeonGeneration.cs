@@ -141,7 +141,6 @@ public class DungeonGeneration : MonoBehaviour
         }
     }
 
-    //TODO: Add rooms within the generated BSP grid
     /// <summary>
     /// Generate the rooms within the binary space partition grid.
     /// </summary>
@@ -161,13 +160,13 @@ public class DungeonGeneration : MonoBehaviour
 
         foreach (RoomNode roomNode in roomList)
         {
-            //TODO: Cut rooms spaces down to leave gaps inbteween for corridors
+            //TODO: Fix room cutting overlapping in y axis
             //Carve room areas into rooms leaving small gaps between rooms
             Vector2Int scale = new Vector2Int(
                 UnityEngine.Random.Range(minimumSize.x, roomNode.Size.x),
                 UnityEngine.Random.Range(minimumSize.y, roomNode.Size.y));
             Vector2Int pos = new Vector2Int(
-                roomNode.Position.x + scale.x/2, 
+                roomNode.Position.x + scale.x / 2,
                 roomNode.Position.y);
             float result = scale.x / 2.0f;
             float result2 = scale.y / 2.0f;
@@ -176,7 +175,7 @@ public class DungeonGeneration : MonoBehaviour
 
             //Spawn in room floors
             GameObject room = Instantiate(roomPrefab,
-                new Vector3(roomNode.Position.x, 0.0f, roomNode.Position.y),
+                new Vector3(roomNode.Position.x, roomPrefab.transform.position.y, roomNode.Position.y),
                 roomPrefab.transform.rotation,
                 this.transform);
             room.transform.localScale = new Vector3(roomNode.Size.x, roomPrefab.transform.localScale.y, roomNode.Size.y);
@@ -196,20 +195,34 @@ public class DungeonGeneration : MonoBehaviour
     {
         hallways = new List<GameObject>();
 
+        RoomNode roomStart = roomList[0];
+        RoomNode roomEnd = roomList[roomList.Count - 1];
+
+        //TODO:Make work with orientation
+
+
+        //Choose a random point in the rooms to generate from
+        Vector2Int startLoc = new Vector2Int(
+            UnityEngine.Random.Range(roomStart.Position.x, roomStart.Position.x + roomStart.Size.x),
+            UnityEngine.Random.Range(roomStart.Position.y, roomStart.Position.x + roomStart.Size.y));
+        Vector2Int endLoc = new Vector2Int(
+            UnityEngine.Random.Range(roomEnd.Position.x, roomEnd.Position.x + roomEnd.Size.x),
+            UnityEngine.Random.Range(roomEnd.Position.y, roomEnd.Position.y + roomEnd.Size.y));
+
         //Get start point and distance to travel in x and y
-        Vector2Int roomDistance = roomList[0].Position - roomList[roomList.Count - 1].Position;
+        Vector2Int roomDistance = endLoc - startLoc;
         roomDistance = new Vector2Int(roomDistance.x, roomDistance.y);
-        int hallwayOneEnd = roomList[0].Position.x + roomDistance.x;
+        int hallwayOneEnd = startLoc.x + roomDistance.x;
 
         //Create hallway sepertly through taxicab geometry (first go via x then y)
         //TODO: Add overlap reduction with room spaces
         GameObject hallwayOne = Instantiate(hallwayPrefab,
-            new Vector3(roomList[0].Position.x, hallwayPrefab.transform.position.y, roomList[0].Position.y),
+            new Vector3(startLoc.x, hallwayPrefab.transform.position.y, startLoc.y),
             hallwayPrefab.transform.rotation,
             this.transform);
         hallwayOne.transform.localScale = new Vector3(roomDistance.x, hallwayPrefab.transform.localScale.y, width);
         GameObject hallwayTwo = Instantiate(hallwayPrefab,
-            new Vector3(hallwayOneEnd, hallwayPrefab.transform.position.y, roomList[0].Position.y),
+            new Vector3(hallwayOneEnd, hallwayPrefab.transform.position.y, startLoc.y),
             hallwayPrefab.transform.rotation,
             this.transform);
         hallwayTwo.transform.localScale = new Vector3(width, hallwayPrefab.transform.localScale.y, roomDistance.y);
