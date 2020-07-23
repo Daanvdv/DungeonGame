@@ -43,9 +43,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e857f31046c7b441822a0f905d87089, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startPoint: {fileID: 1072079413527009976, guid: 9666712f80e87224e8cd3163f4672657,
+  startPointPrefab: {fileID: 1072079413527009976, guid: 9666712f80e87224e8cd3163f4672657,
     type: 3}
-  endPoint: {fileID: 1625215883484621755, guid: 148ac6b32dd747f41aa1e6cfe8ecebe8,
+  endPointPrefab: {fileID: 1625215883484621755, guid: 148ac6b32dd747f41aa1e6cfe8ecebe8,
     type: 3}
   roomPrefab: {fileID: 7553684648177792973, guid: cd388f75a8de63b4181a9f6673dfefea,
     type: 3}

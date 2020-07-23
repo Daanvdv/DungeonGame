@@ -6,8 +6,8 @@ using UnityEngine;
 public class DungeonGeneration : MonoBehaviour
 {
     [Header("Prefabs")]
-    public GameObject startPoint;
-    public GameObject endPoint;
+    public GameObject startPointPrefab;
+    public GameObject endPointPrefab;
     public GameObject roomPrefab;
     public GameObject hallwayPrefab;
 
@@ -15,15 +15,18 @@ public class DungeonGeneration : MonoBehaviour
     public Vector2Int dungeonSize;
     public Vector2Int minRoomSize;
     public int hallwayWidth;
+    public int wallThickness;
 
     [Header("Dungeon Generation Options")]
     public int maxIterations;
     public int seed;
+    public int roomOffsetSize;
 
     private List<Node> nodeList;
     private List<RoomNode> roomList;
     private List<GameObject> rooms;
     private List<GameObject> hallways;
+    private List<GameObject> points;
 
     enum TileType
     {
@@ -44,7 +47,7 @@ public class DungeonGeneration : MonoBehaviour
         GenerateDungeon(dungeonSize, maxIterations, minRoomSize);
         CreateRooms(minRoomSize);
         CreateHallways(hallwayWidth);
-        PlacePoints(startPoint, endPoint);
+        PlacePoints(startPointPrefab, endPointPrefab);
         CheckPath();
     }
 
@@ -142,14 +145,36 @@ public class DungeonGeneration : MonoBehaviour
     /// <summary>
     /// Generate the rooms within the binary space partition grid.
     /// </summary>
-    /// <param name="minimumSize">Minium size of rooms</param>
+    /// <param name="minimumSize">Minium size of rooms.</param>
     private void CreateRooms(Vector2Int minimumSize)
     {
         //Spawn rooms as planes
         rooms = new List<GameObject>();
+
+        //int scaleX = UnityEngine.Random.Range(minimumSize.x, roomList[0].Size.x);
+        //int scaleY = UnityEngine.Random.Range(minimumSize.y, roomList[0].Size.y);
+        //int posX = roomList[0].Position.x + (scaleX/2); //UnityEngine.Random.Range(roomList[0].Position.x, roomList[0].Position.x + scaleX);
+        //int posY = roomList[0].Position.y + (scaleY/2); //UnityEngine.Random.Range(roomList[0].Position.y, roomList[0].Position.y + scaleY);
+        //
+        //roomList[0].Size = new Vector2Int(scaleX, scaleY);
+        //roomList[0].Position = new Vector2Int(posX, posY);
+
         foreach (RoomNode roomNode in roomList)
         {
             //TODO: Cut rooms spaces down to leave gaps inbteween for corridors
+            //Carve room areas into rooms leaving small gaps between rooms
+            Vector2Int scale = new Vector2Int(
+                UnityEngine.Random.Range(minimumSize.x, roomNode.Size.x),
+                UnityEngine.Random.Range(minimumSize.y, roomNode.Size.y));
+            Vector2Int pos = new Vector2Int(
+                roomNode.Position.x + scale.x/2, 
+                roomNode.Position.y);
+            float result = scale.x / 2.0f;
+            float result2 = scale.y / 2.0f;
+            roomNode.Position = pos;
+            roomNode.Size = scale;
+
+            //Spawn in room floors
             GameObject room = Instantiate(roomPrefab,
                 new Vector3(roomNode.Position.x, 0.0f, roomNode.Position.y),
                 roomPrefab.transform.rotation,
@@ -172,8 +197,8 @@ public class DungeonGeneration : MonoBehaviour
         hallways = new List<GameObject>();
 
         //Get start point and distance to travel in x and y
-        Vector2Int roomDistance = roomList[0].Position - roomList[roomList.Count-1].Position;
-        roomDistance = new Vector2Int(Math.Abs(roomDistance.x), Math.Abs(roomDistance.y));
+        Vector2Int roomDistance = roomList[0].Position - roomList[roomList.Count - 1].Position;
+        roomDistance = new Vector2Int(roomDistance.x, roomDistance.y);
         int hallwayOneEnd = roomList[0].Position.x + roomDistance.x;
 
         //Create hallway sepertly through taxicab geometry (first go via x then y)
@@ -196,11 +221,32 @@ public class DungeonGeneration : MonoBehaviour
     /// <summary>
     /// Place the start and end points for the player within the dungeon.
     /// </summary>
-    /// <param name="startPoint">Start point prefab.</param>
-    /// <param name="endPoint">End point prefab.</param>
-    private void PlacePoints(GameObject startPoint, GameObject endPoint)
+    /// <param name="startPrefab">Start point prefab.</param>
+    /// <param name="endPrefab">End point prefab.</param>
+    private void PlacePoints(GameObject startPrefab, GameObject endPrefab)
     {
+        points = new List<GameObject>();
 
+        //Get a random spot from a room
+        Vector2Int startPos = new Vector2Int(
+            roomList[0].Position.x,
+            roomList[0].Position.y);
+        Vector2Int endPos = new Vector2Int(
+            roomList[roomList.Count - 1].Position.x,
+            roomList[roomList.Count - 1].Position.y);
+
+        GameObject startPoint = Instantiate(startPrefab,
+            new Vector3(startPos.x, startPrefab.transform.position.x, startPos.y),
+            startPrefab.transform.rotation,
+            this.transform);
+
+        GameObject endPoint = Instantiate(endPrefab,
+            new Vector3(endPos.x, endPrefab.transform.position.y, endPos.y),
+            endPrefab.transform.rotation,
+            this.transform);
+
+        points.Add(startPoint);
+        points.Add(endPoint);
     }
 
     //TODO: Add A* path finding to see if it is possible to complete the dungeon

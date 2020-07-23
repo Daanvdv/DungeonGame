@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class RoomNode : Node
 {
-    public Vector2Int Position { get; }
-    public Vector2Int Size { get; }
+    public Vector2Int Position { get; set; }
+    public Vector2Int Size { get; set; }
 
     /// <summary>
     /// 
