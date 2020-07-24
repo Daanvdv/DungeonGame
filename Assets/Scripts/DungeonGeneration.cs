@@ -16,6 +16,7 @@ public class DungeonGeneration : MonoBehaviour
     public Vector2Int minRoomSize;
     public int hallwayWidth;
     public int wallThickness;
+    public bool generateDungeon = false;
 
     [Header("Dungeon Generation Options")]
     public int maxIterations;
@@ -98,10 +99,12 @@ public class DungeonGeneration : MonoBehaviour
                 cutType = (CutType)UnityEngine.Random.Range((int)CutType.x, (int)(CutType.y));
             }
 
+            //TODO: Fix issues with higher iterations causing smaller than minium size rooms
+            //Potential fix, if node size too small, skip current cut
             if (cutType == CutType.x)
             {
                 //Choose a random postion between the current root nodes position and size to split and set the child nodes within
-                int cutPosX = UnityEngine.Random.Range(minRoomSize.x, rootNode.Size.x - minRoomSize.x);
+                int cutPosX = UnityEngine.Random.Range(minRoomSize.x, rootNode.Size.x - minRoomSize.x); /*RandomInt(minRoomSize.x, rootNode.Size.x - minRoomSize.x);*/
 
                 //Calculate the cut and the size of the new room
                 nodeOneSize = new Vector2Int(cutPosX, rootNode.Size.y);
@@ -114,7 +117,7 @@ public class DungeonGeneration : MonoBehaviour
             else
             {
                 //Choose a random postion between the current root nodes position and size to split and set the child nodes within
-                int cutPosY = UnityEngine.Random.Range(minRoomSize.y, rootNode.Size.y - minRoomSize.y);
+                int cutPosY = UnityEngine.Random.Range(minRoomSize.y, rootNode.Size.y - minRoomSize.y); /*RandomInt(minRoomSize.y, rootNode.Size.y - minRoomSize.y);*/
 
                 //Calculate the size and postion of the new rooms
                 nodeOneSize = new Vector2Int(rootNode.Size.x, cutPosY);
@@ -150,26 +153,17 @@ public class DungeonGeneration : MonoBehaviour
         //Spawn rooms as planes
         rooms = new List<GameObject>();
 
-        //int scaleX = UnityEngine.Random.Range(minimumSize.x, roomList[0].Size.x);
-        //int scaleY = UnityEngine.Random.Range(minimumSize.y, roomList[0].Size.y);
-        //int posX = roomList[0].Position.x + (scaleX/2); //UnityEngine.Random.Range(roomList[0].Position.x, roomList[0].Position.x + scaleX);
-        //int posY = roomList[0].Position.y + (scaleY/2); //UnityEngine.Random.Range(roomList[0].Position.y, roomList[0].Position.y + scaleY);
-        //
-        //roomList[0].Size = new Vector2Int(scaleX, scaleY);
-        //roomList[0].Position = new Vector2Int(posX, posY);
-
+        //TODO: Fix issues where rooms will be right up next to each other with bigger room sizes and smaller overall spaces
+        //Last room with settings seed 1703 min hallway 4,4 dungeon size 30,30 iterations 15
         foreach (RoomNode roomNode in roomList)
         {
-            //TODO: Fix room cutting overlapping in y axis
             //Carve room areas into rooms leaving small gaps between rooms
-            Vector2Int scale = new Vector2Int(
-                UnityEngine.Random.Range(minimumSize.x, roomNode.Size.x),
-                UnityEngine.Random.Range(minimumSize.y, roomNode.Size.y));
             Vector2Int pos = new Vector2Int(
-                roomNode.Position.x + scale.x / 2,
-                roomNode.Position.y);
-            float result = scale.x / 2.0f;
-            float result2 = scale.y / 2.0f;
+                UnityEngine.Random.Range(roomNode.Position.x, roomNode.Position.x + roomNode.Size.x - minRoomSize.x - roomOffsetSize),
+                UnityEngine.Random.Range(roomNode.Position.y, roomNode.Position.y + roomNode.Size.y - minRoomSize.x - roomOffsetSize));
+            Vector2Int scale = new Vector2Int(
+                UnityEngine.Random.Range(minRoomSize.x, roomNode.Size.x - (pos.x - roomNode.Position.x) - roomOffsetSize),
+                UnityEngine.Random.Range(minimumSize.y, roomNode.Size.y - (pos.y - roomNode.Position.y) - roomOffsetSize));
             roomNode.Position = pos;
             roomNode.Size = scale;
 
@@ -195,19 +189,17 @@ public class DungeonGeneration : MonoBehaviour
     {
         hallways = new List<GameObject>();
 
+        //TODO: Multiple iteartions of creating hallways
         RoomNode roomStart = roomList[0];
         RoomNode roomEnd = roomList[roomList.Count - 1];
 
-        //TODO:Make work with orientation
-
-
         //Choose a random point in the rooms to generate from
         Vector2Int startLoc = new Vector2Int(
-            UnityEngine.Random.Range(roomStart.Position.x, roomStart.Position.x + roomStart.Size.x),
+            roomStart.Position.x + roomStart.Size.x,
             UnityEngine.Random.Range(roomStart.Position.y, roomStart.Position.x + roomStart.Size.y));
         Vector2Int endLoc = new Vector2Int(
             UnityEngine.Random.Range(roomEnd.Position.x, roomEnd.Position.x + roomEnd.Size.x),
-            UnityEngine.Random.Range(roomEnd.Position.y, roomEnd.Position.y + roomEnd.Size.y));
+            roomEnd.Position.y);
 
         //Get start point and distance to travel in x and y
         Vector2Int roomDistance = endLoc - startLoc;
@@ -221,11 +213,17 @@ public class DungeonGeneration : MonoBehaviour
             hallwayPrefab.transform.rotation,
             this.transform);
         hallwayOne.transform.localScale = new Vector3(roomDistance.x, hallwayPrefab.transform.localScale.y, width);
+        HallwayInfo info = hallwayOne.AddComponent<HallwayInfo>();
+        info.startPosition = startLoc;
+        info.endPosition = new Vector2Int(hallwayOneEnd, startLoc.x + roomDistance.x);
         GameObject hallwayTwo = Instantiate(hallwayPrefab,
             new Vector3(hallwayOneEnd, hallwayPrefab.transform.position.y, startLoc.y),
             hallwayPrefab.transform.rotation,
             this.transform);
         hallwayTwo.transform.localScale = new Vector3(width, hallwayPrefab.transform.localScale.y, roomDistance.y);
+        info = hallwayTwo.AddComponent<HallwayInfo>();
+        info.startPosition = new Vector2Int(hallwayOneEnd, startLoc.x + roomDistance.x);
+        info.endPosition = endLoc;
 
         hallways.Add(hallwayOne);
         hallways.Add(hallwayTwo);
