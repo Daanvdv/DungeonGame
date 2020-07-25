@@ -51,8 +51,11 @@ MonoBehaviour:
     type: 3}
   hallwayPrefab: {fileID: 9006073204550039096, guid: edd1983333798b7458ab3479d699016a,
     type: 3}
-  dungeonSize: {x: 50, y: 50}
-  minRoomSize: {x: 2, y: 2}
-  hallwayWidth: 1
+  dungeonSize: {x: 30, y: 30}
+  minRoomSize: {x: 4, y: 4}
+  hallwayWidth: 2
+  wallThickness: 0
+  generateDungeon: 0
   maxIterations: 15
-  seed: 6232
+  seed: 1703
+  roomOffsetSize: 0

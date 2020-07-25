@@ -52,6 +52,27 @@ public class DungeonGeneration : MonoBehaviour
         CheckPath();
     }
 
+    //Crude generate dungeon,does not fully work yet
+    private void OnValidate()
+    {
+        if (generateDungeon)
+        {
+            var children = this.transform.GetComponentInChildren<Transform>();
+            foreach (Transform child in children)
+            {
+                DestroyImmediate(child);
+            }
+
+            UnityEngine.Random.InitState(seed);
+            GenerateDungeon(dungeonSize, maxIterations, minRoomSize);
+            CreateRooms(minRoomSize);
+            CreateHallways(hallwayWidth);
+            PlacePoints(startPointPrefab, endPointPrefab);
+            CheckPath();
+            generateDungeon = false;
+        }
+    }
+
     //I have looked at certain diffrent implementations and from what I have seen I decided on using Binary Space Partioning
     //as it gives the result that I want.
     //For implementation I decided to start the generation at 0,0 and then expand on the x and y
@@ -133,6 +154,8 @@ public class DungeonGeneration : MonoBehaviour
             nodeList.Add(nodeTwo);
             rootNode.AddChild(nodeOne);
             rootNode.AddChild(nodeTwo);
+            nodeOne.ParentNode = rootNode;
+            nodeTwo.ParentNode = rootNode;
             roomList.Add(nodeOne);
             roomList.Add(nodeTwo);
 
@@ -180,7 +203,6 @@ public class DungeonGeneration : MonoBehaviour
         }
     }
 
-    //TODO: Add create hallways between rooms within sections and then connect those hallways that have been created
     /// <summary>
     /// Generate hallways between rooms and other hallways.
     /// </summary>
@@ -190,43 +212,67 @@ public class DungeonGeneration : MonoBehaviour
         hallways = new List<GameObject>();
 
         //TODO: Multiple iteartions of creating hallways
-        RoomNode roomStart = roomList[0];
-        RoomNode roomEnd = roomList[roomList.Count - 1];
+        RoomNode roomStart;
+        RoomNode roomEnd;
 
-        //Choose a random point in the rooms to generate from
-        Vector2Int startLoc = new Vector2Int(
-            roomStart.Position.x + roomStart.Size.x,
-            UnityEngine.Random.Range(roomStart.Position.y, roomStart.Position.x + roomStart.Size.y));
-        Vector2Int endLoc = new Vector2Int(
-            UnityEngine.Random.Range(roomEnd.Position.x, roomEnd.Position.x + roomEnd.Size.x),
-            roomEnd.Position.y);
+        //TODO: Make more variation, maybe start with y at times then x
+        //TODO: Make connections between all hallways
+        //TODO: Fix issues where too many hallways are spwaned
+        //TODO: Connect hallways together from the same parent to reduce the amount of overlap
+        for (int i = 0; i < roomList.Count - 1; i++)
+        {
+            if (roomList[i].Visited)
+            {
+                continue;
+            }
+            for (int k = roomList.Count - 1; k != 0; k--)
+            {
+                if (roomList[k].Visited)
+                {
+                    continue;
+                }
+                roomStart = roomList[i];
+                roomEnd = roomList[k];
 
-        //Get start point and distance to travel in x and y
-        Vector2Int roomDistance = endLoc - startLoc;
-        roomDistance = new Vector2Int(roomDistance.x, roomDistance.y);
-        int hallwayOneEnd = startLoc.x + roomDistance.x;
+                //Choose a random point in the rooms to generate from
+                Vector2Int startLoc = new Vector2Int(
+                    roomStart.Position.x + roomStart.Size.x,
+                    UnityEngine.Random.Range(roomStart.Position.y, roomStart.Position.x + roomStart.Size.y));
+                Vector2Int endLoc = new Vector2Int(
+                    UnityEngine.Random.Range(roomEnd.Position.x, roomEnd.Position.x + roomEnd.Size.x),
+                    roomEnd.Position.y);
 
-        //Create hallway sepertly through taxicab geometry (first go via x then y)
-        //TODO: Add overlap reduction with room spaces
-        GameObject hallwayOne = Instantiate(hallwayPrefab,
-            new Vector3(startLoc.x, hallwayPrefab.transform.position.y, startLoc.y),
-            hallwayPrefab.transform.rotation,
-            this.transform);
-        hallwayOne.transform.localScale = new Vector3(roomDistance.x, hallwayPrefab.transform.localScale.y, width);
-        HallwayInfo info = hallwayOne.AddComponent<HallwayInfo>();
-        info.startPosition = startLoc;
-        info.endPosition = new Vector2Int(hallwayOneEnd, startLoc.x + roomDistance.x);
-        GameObject hallwayTwo = Instantiate(hallwayPrefab,
-            new Vector3(hallwayOneEnd, hallwayPrefab.transform.position.y, startLoc.y),
-            hallwayPrefab.transform.rotation,
-            this.transform);
-        hallwayTwo.transform.localScale = new Vector3(width, hallwayPrefab.transform.localScale.y, roomDistance.y);
-        info = hallwayTwo.AddComponent<HallwayInfo>();
-        info.startPosition = new Vector2Int(hallwayOneEnd, startLoc.x + roomDistance.x);
-        info.endPosition = endLoc;
+                //Get start point and distance to travel in x and y
+                Vector2Int roomDistance = endLoc - startLoc;
+                roomDistance = new Vector2Int(roomDistance.x, roomDistance.y);
+                int hallwayOneEnd = startLoc.x + roomDistance.x;
 
-        hallways.Add(hallwayOne);
-        hallways.Add(hallwayTwo);
+                //Create hallway sepertly through taxicab geometry (first go via x then y)
+                //TODO: Add overlap reduction with room spaces
+                GameObject hallwayOne = Instantiate(hallwayPrefab,
+                    new Vector3(startLoc.x, hallwayPrefab.transform.position.y, startLoc.y),
+                    hallwayPrefab.transform.rotation,
+                    this.transform);
+                hallwayOne.transform.localScale = new Vector3(roomDistance.x, hallwayPrefab.transform.localScale.y, width);
+                HallwayInfo info = hallwayOne.AddComponent<HallwayInfo>();
+                info.startPosition = startLoc;
+                info.endPosition = new Vector2Int(hallwayOneEnd, startLoc.x + roomDistance.x);
+                GameObject hallwayTwo = Instantiate(hallwayPrefab,
+                    new Vector3(hallwayOneEnd, hallwayPrefab.transform.position.y, startLoc.y),
+                    hallwayPrefab.transform.rotation,
+                    this.transform);
+                hallwayTwo.transform.localScale = new Vector3(width, hallwayPrefab.transform.localScale.y, roomDistance.y);
+                info = hallwayTwo.AddComponent<HallwayInfo>();
+                info.startPosition = new Vector2Int(hallwayOneEnd, startLoc.x + roomDistance.x);
+                info.endPosition = endLoc;
+
+                roomList[i].Visited = true;
+                roomList[k].Visited = true;
+
+                hallways.Add(hallwayOne);
+                hallways.Add(hallwayTwo);
+            }
+        }
     }
 
     /// <summary>
@@ -238,13 +284,16 @@ public class DungeonGeneration : MonoBehaviour
     {
         points = new List<GameObject>();
 
+        RoomNode roomStart = roomList[0];
+        RoomNode roomEnd = roomList[roomList.Count - 1];
+
         //Get a random spot from a room
         Vector2Int startPos = new Vector2Int(
-            roomList[0].Position.x,
-            roomList[0].Position.y);
+            roomStart.Position.x,
+            roomStart.Position.y);
         Vector2Int endPos = new Vector2Int(
-            roomList[roomList.Count - 1].Position.x,
-            roomList[roomList.Count - 1].Position.y);
+            roomEnd.Position.x,
+            roomEnd.Position.y);
 
         GameObject startPoint = Instantiate(startPrefab,
             new Vector3(startPos.x, startPrefab.transform.position.x, startPos.y),
@@ -261,6 +310,9 @@ public class DungeonGeneration : MonoBehaviour
     }
 
     //TODO: Add A* path finding to see if it is possible to complete the dungeon
+    /// <summary>
+    /// Check path betwene start and end point.
+    /// </summary>
     private void CheckPath()
     {
 

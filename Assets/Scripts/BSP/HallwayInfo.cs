@@ -9,4 +9,5 @@ public class HallwayInfo : MonoBehaviour
     public Vector2Int endPosition;
     public Vector2Int pos;
     public Vector2Int size;
+    public bool connected;
 }

@@ -289,37 +289,7 @@ PrefabInstance:
     - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
         type: 3}
       propertyPath: hallwayWidth
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
-        type: 3}
-      propertyPath: dungeonSize.x
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
-        type: 3}
-      propertyPath: dungeonSize.y
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
-        type: 3}
-      propertyPath: seed
-      value: 1703
-      objectReference: {fileID: 0}
-    - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
-        type: 3}
-      propertyPath: maxIterations
-      value: 15
-      objectReference: {fileID: 0}
-    - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
-        type: 3}
-      propertyPath: minRoomSize.x
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 642217606709619483, guid: 73c832680c8dfd3438637d5884086e4b,
-        type: 3}
-      propertyPath: minRoomSize.y
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 73c832680c8dfd3438637d5884086e4b, type: 3}
