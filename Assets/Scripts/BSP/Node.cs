@@ -5,19 +5,14 @@ using UnityEngine;
 
 public class Node
 {
-    private List<Node> childNodes;
-
-    public List<Node> ChildNodesList { get => childNodes; }
-
+    public List<Node> ChildNodesList { get; }
     public bool Visited { get; set; }
-
     public Node ParentNode { get; set; }
-
     public int DepthIndex { get; set; }
 
     public Node(Node parentNode)
     {
-        childNodes = new List<Node>();
+        ChildNodesList = new List<Node>();
         this.ParentNode = parentNode;
         if (parentNode != null)
         {
@@ -27,10 +22,10 @@ public class Node
 
     public void AddChild(Node node)
     {
-        childNodes.Add(node);
+        ChildNodesList.Add(node);
     }
     public void RemoveChild(Node node)
     {
-        childNodes.Remove(node);
+        ChildNodesList.Remove(node);
     }
 }

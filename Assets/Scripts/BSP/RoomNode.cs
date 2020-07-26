@@ -6,7 +6,6 @@ public class RoomNode : Node
 {
     public Vector2Int Position { get; set; }
     public Vector2Int Size { get; set; }
-
     /// <summary>
     /// 
     /// </summary>
