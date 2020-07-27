@@ -31,12 +31,6 @@ public class DungeonGeneration : MonoBehaviour
     private List<GameObject> hallways;
     private List<GameObject> points;
 
-    enum TileType
-    {
-        empty = 1024,
-        wall,
-    }
-
     enum CutType
     {
         x = 2048,
@@ -66,12 +60,9 @@ public class DungeonGeneration : MonoBehaviour
         //Setup first node and node list
         nodeList = new List<Node>();
         roomList = new List<RoomNode>();
-        RoomNode rootNode = new RoomNode(new Vector2Int(0, 0), dungeonSize, 0, null);
+        RoomNode rootNode = new RoomNode(new Vector2Int(0, 0), dungeonSize, null);
         nodeList.Add(rootNode);
         roomList.Add(rootNode);
-
-        ///TODO: Make index increment only once the tree goes down another layer
-        int index = 1;
 
         for (int i = 0; i < maxIterations; i++)
         {
@@ -83,7 +74,7 @@ public class DungeonGeneration : MonoBehaviour
             Vector2Int nodeTwoSize;
 
             //Choose wether to split on x or y axis
-            //Crude refactor
+            //Crude, refactor
             CutType cutType;
 
             if (rootNode.Size.x > rootNode.Size.y)
@@ -111,8 +102,8 @@ public class DungeonGeneration : MonoBehaviour
                 nodeTwoSize = new Vector2Int(rootNode.Size.x - cutPosX, rootNode.Size.y);
                 nodeTwoPos = new Vector2Int(rootNode.Position.x + nodeOneSize.x, rootNode.Position.y);
 
-                nodeOne = new RoomNode(rootNode.Position, nodeOneSize, index, rootNode);
-                nodeTwo = new RoomNode(nodeTwoPos, nodeTwoSize, index, rootNode);
+                nodeOne = new RoomNode(rootNode.Position, nodeOneSize, rootNode);
+                nodeTwo = new RoomNode(nodeTwoPos, nodeTwoSize, rootNode);
             }
             else
             {
@@ -124,8 +115,8 @@ public class DungeonGeneration : MonoBehaviour
                 nodeTwoSize = new Vector2Int(rootNode.Size.x, rootNode.Size.y - cutPosY);
                 nodeTwoPos = new Vector2Int(rootNode.Position.x, rootNode.Position.y + nodeOneSize.y);
 
-                nodeOne = new RoomNode(rootNode.Position, nodeOneSize, index, rootNode);
-                nodeTwo = new RoomNode(nodeTwoPos, nodeTwoSize, index, rootNode);
+                nodeOne = new RoomNode(rootNode.Position, nodeOneSize, rootNode);
+                nodeTwo = new RoomNode(nodeTwoPos, nodeTwoSize, rootNode);
             }
 
             //Add new rooms as children to the root then move on to the next root node

@@ -8,7 +8,6 @@ public class Node
     public List<Node> ChildNodesList { get; }
     public bool Visited { get; set; }
     public Node ParentNode { get; set; }
-    public int DepthIndex { get; set; }
 
     public Node(Node parentNode)
     {

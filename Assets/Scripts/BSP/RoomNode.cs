@@ -8,11 +8,10 @@ public class RoomNode : Node
     public Vector2Int Size { get; set; }
     public List<Hallway> ConnectedHallways { get; set; }
 
-    public RoomNode(Vector2Int position, Vector2Int size, int depth, Node parent) : base(parent)
+    public RoomNode(Vector2Int position, Vector2Int size, Node parent) : base(parent)
     {
         this.Size = size;
         this.Position = position;
-        this.DepthIndex = depth;
     }
 
     /// <summary>
