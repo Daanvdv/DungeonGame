@@ -1,1 +1,4 @@
 # DungeonGame
+
+This project was a coding challenge that was given to me focusing on procedural generation. Procedural generation is a very new topic to me so it took me a bit to get into.
+I started looking up some uses and different implementations in games, such as Nuclear Throne and Binding of Isaac, and online examples to look into what I thought I could work on as well as what I liked the outcome of. I decided to use Binary Space Partitioning algorithm for generating a dungeon. I chose this algorithm for its simplicity and overall potential of the results which I found to fit what I wanted. I found this video: https://youtu.be/XsFa84icBYg which had an explanation and usage which I liked the idea of. I then used this video: https://youtu.be/VnqN0v95jtU for more of a theory overview of the algorithm. I tried to focus only surface level on the implementations that I found so that I could better practice implementing by myself.
