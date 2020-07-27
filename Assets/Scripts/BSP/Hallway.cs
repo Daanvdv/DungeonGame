@@ -8,6 +8,7 @@ public class Hallway : Node
     public Vector2Int EndPoint { get; set; }
     public bool XFirst { get; set; }
     public List<Hallway> ConnectedHallways { get; set; }
+    public List<RoomNode> ConnectedRooms { get; set; }
 
     /// <summary>
     /// 
@@ -23,10 +24,16 @@ public class Hallway : Node
         this.XFirst = xFirst;
 
         ConnectedHallways = new List<Hallway>();
+        ConnectedRooms = new List<RoomNode>();
     }
 
     public void ConnectHallway(Hallway other)
     {
         ConnectedHallways.Add(other);
+    }
+
+    public void ConnectRoom(RoomNode room)
+    {
+        ConnectedRooms.Add(room);
     }
 }

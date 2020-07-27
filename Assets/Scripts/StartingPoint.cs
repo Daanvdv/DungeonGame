@@ -7,15 +7,12 @@ public class StartingPoint : MonoBehaviour
     [Header("Options")]
     public GameObject player;
 
+    [Header("Info")]
+    public RoomNode room;
+
     // Start is called before the first frame update
     void Start()
     {
         Instantiate(player, this.transform);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

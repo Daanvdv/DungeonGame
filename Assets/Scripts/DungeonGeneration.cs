@@ -22,6 +22,7 @@ public class DungeonGeneration : MonoBehaviour
     public int maxIterations;
     public int seed;
     public int roomOffsetSize;
+    public int hallwayIteratioons;
 
     private List<Node> nodeList;
     private List<RoomNode> roomList;
@@ -50,28 +51,7 @@ public class DungeonGeneration : MonoBehaviour
         CreateRooms(minRoomSize);
         CreateHallways(hallwayWidth);
         PlacePoints(startPointPrefab, endPointPrefab);
-        CheckPath();
-    }
-
-    //Crude generate dungeon,does not fully work yet
-    private void OnValidate()
-    {
-        if (generateDungeon)
-        {
-            var children = this.transform.GetComponentInChildren<Transform>();
-            foreach (Transform child in children)
-            {
-                DestroyImmediate(child);
-            }
-
-            UnityEngine.Random.InitState(seed);
-            GenerateDungeon(dungeonSize, maxIterations, minRoomSize);
-            CreateRooms(minRoomSize);
-            CreateHallways(hallwayWidth);
-            PlacePoints(startPointPrefab, endPointPrefab);
-            CheckPath();
-            generateDungeon = false;
-        }
+        CheckPath(points[0], points[1]);
     }
 
     //I have looked at certain diffrent implementations and from what I have seen I decided on using Binary Space Partioning
@@ -239,6 +219,8 @@ public class DungeonGeneration : MonoBehaviour
 
             //Save as node with info
             Hallway hallway = new Hallway(startLoc, endLoc, true, null);
+            hallway.ConnectRoom(roomStart);
+            hallway.ConnectRoom(roomEnd);
             hallwayList.Add(hallway);
 
             //Choose a random point in the rooms to generate from
@@ -256,20 +238,68 @@ public class DungeonGeneration : MonoBehaviour
             roomEnd.Visited = true;
         }
 
-        //TODO: Make connections between all hallways
-        for (int i = 1; i < hallwayList.Count; i+=2)
+        int firstStageHallwayCount = hallwayList.Count;
+
+        //Make connections between hallways
+        for (int i = 1; i < firstStageHallwayCount; i += 2)
         {
-            Hallway hallwayStart = hallwayList[i-1];
+            Hallway hallwayStart = hallwayList[i - 1];
             Hallway hallwayEnd = hallwayList[i];
-            
+
             Vector2Int startLoc = new Vector2Int(
-                hallwayStart.StartPoint.x + (hallwayStart.EndPoint.x - hallwayStart.StartPoint.x)/2,
+                hallwayStart.StartPoint.x + (hallwayStart.EndPoint.x - hallwayStart.StartPoint.x) / 2,
                 hallwayStart.EndPoint.y);
             Vector2Int endLoc = new Vector2Int(
-                hallwayEnd.StartPoint.x + (hallwayEnd.EndPoint.x - hallwayEnd.StartPoint.x)/2,
+                hallwayEnd.StartPoint.x + (hallwayEnd.EndPoint.x - hallwayEnd.StartPoint.x) / 2,
                 hallwayEnd.StartPoint.y);
 
             Hallway hallway = new Hallway(startLoc, endLoc, true, hallwayStart);
+            foreach (var room in hallwayStart.ConnectedRooms)
+            {
+                hallway.ConnectRoom(room);
+
+            }
+            foreach (var room in hallwayEnd.ConnectedRooms)
+            {
+                hallway.ConnectRoom(room);
+            }
+            hallwayList.Add(hallway);
+
+            SpawnHallways(width, startLoc, endLoc, true);
+
+            hallwayStart.ConnectHallway(hallwayEnd);
+            hallwayEnd.ConnectHallway(hallwayStart);
+        }
+
+        //Make more hallway connections
+        //TODO: Clean up to not be copy paste of previous loop
+        for (int i = firstStageHallwayCount; i < hallwayList.Count; i += 2)
+        {
+            Hallway hallwayStart = hallwayList[i - 1];
+            Hallway hallwayEnd = hallwayList[i];
+
+            if (hallwayStart.Visited || hallwayEnd.Visited)
+            {
+                continue;
+            }
+
+            Vector2Int startLoc = new Vector2Int(
+                hallwayStart.StartPoint.x + (hallwayStart.EndPoint.x - hallwayStart.StartPoint.x) / 2,
+                hallwayStart.EndPoint.y);
+            Vector2Int endLoc = new Vector2Int(
+                hallwayEnd.StartPoint.x + (hallwayEnd.EndPoint.x - hallwayEnd.StartPoint.x) / 2,
+                hallwayEnd.StartPoint.y);
+
+            Hallway hallway = new Hallway(startLoc, endLoc, true, hallwayStart);
+            foreach (var room in hallwayStart.ConnectedRooms)
+            {
+                hallway.ConnectRoom(room);
+
+            }
+            foreach (var room in hallwayEnd.ConnectedRooms)
+            {
+                hallway.ConnectRoom(room);
+            }
             hallwayList.Add(hallway);
 
             SpawnHallways(width, startLoc, endLoc, true);
@@ -317,6 +347,8 @@ public class DungeonGeneration : MonoBehaviour
     private void PlacePoints(GameObject startPrefab, GameObject endPrefab)
     {
         points = new List<GameObject>();
+        StartingPoint startingPointScript;
+        EndingPoint endingPointScript;
 
         RoomNode roomStart = roomList[0];
         RoomNode roomEnd = roomList[roomList.Count - 1];
@@ -333,22 +365,43 @@ public class DungeonGeneration : MonoBehaviour
             new Vector3(startPos.x, startPrefab.transform.position.x, startPos.y),
             startPrefab.transform.rotation,
             this.transform);
+        startingPointScript = startPoint.GetComponent<StartingPoint>();
+        startingPointScript.room = roomStart;
 
         GameObject endPoint = Instantiate(endPrefab,
             new Vector3(endPos.x, endPrefab.transform.position.y, endPos.y),
             endPrefab.transform.rotation,
             this.transform);
+        endingPointScript = endPoint.GetComponent<EndingPoint>();
+        endingPointScript.room = roomEnd;
 
         points.Add(startPoint);
         points.Add(endPoint);
     }
 
     //TODO: Add A* path finding to see if it is possible to complete the dungeon
+    // Could use unity agents to complete this
+    //TODO: Check through points and rooms they are in to see if they are connected
     /// <summary>
     /// Check path betwene start and end point.
     /// </summary>
-    private void CheckPath()
+    private void CheckPath(GameObject start, GameObject end)
     {
+        StartingPoint startPoint = start.GetComponent<StartingPoint>();
+        EndingPoint endPoint = end.GetComponent<EndingPoint>();
 
+        RoomNode startRoom = startPoint.room;
+        RoomNode endRoom = endPoint.room;
+
+        int connections = 0;
+
+        foreach (Hallway hallway in hallwayList)
+        {
+            if (hallway.ConnectedRooms.Contains(startRoom) && hallway.ConnectedRooms.Contains(endRoom))
+            {
+                connections++;
+                Debug.Log("Connection found");
+            }
+        }
     }
 }

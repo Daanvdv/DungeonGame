@@ -6,6 +6,8 @@ public class RoomNode : Node
 {
     public Vector2Int Position { get; set; }
     public Vector2Int Size { get; set; }
+    public List<Hallway> ConnectedHallways { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
@@ -18,5 +20,10 @@ public class RoomNode : Node
         this.Size = size;
         this.Position = position;
         this.DepthIndex = depth;
+    }
+
+    public void ConnectHallway(Hallway hallway)
+    {
+        ConnectedHallways.Add(hallway);
     }
 }
