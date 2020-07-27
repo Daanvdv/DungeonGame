@@ -54,8 +54,6 @@ public class DungeonGeneration : MonoBehaviour
         CheckPath(points[0], points[1]);
     }
 
-    //I have looked at certain diffrent implementations and from what I have seen I decided on using Binary Space Partioning
-    //as it gives the result that I want.
     //For implementation I decided to start the generation at 0,0 and then expand on the x and y
     /// <summary>
     /// Generate Binary Space Partioning grid for the base of dungeon generation.
@@ -106,7 +104,7 @@ public class DungeonGeneration : MonoBehaviour
             if (cutType == CutType.x)
             {
                 //Choose a random postion between the current root nodes position and size to split and set the child nodes within
-                int cutPosX = UnityEngine.Random.Range(minRoomSize.x, rootNode.Size.x - minRoomSize.x); /*RandomInt(minRoomSize.x, rootNode.Size.x - minRoomSize.x);*/
+                int cutPosX = UnityEngine.Random.Range(minRoomSize.x, rootNode.Size.x - minRoomSize.x);
 
                 //Calculate the cut and the size of the new room
                 nodeOneSize = new Vector2Int(cutPosX, rootNode.Size.y);
@@ -119,7 +117,7 @@ public class DungeonGeneration : MonoBehaviour
             else
             {
                 //Choose a random postion between the current root nodes position and size to split and set the child nodes within
-                int cutPosY = UnityEngine.Random.Range(minRoomSize.y, rootNode.Size.y - minRoomSize.y); /*RandomInt(minRoomSize.y, rootNode.Size.y - minRoomSize.y);*/
+                int cutPosY = UnityEngine.Random.Range(minRoomSize.y, rootNode.Size.y - minRoomSize.y);
 
                 //Calculate the size and postion of the new rooms
                 nodeOneSize = new Vector2Int(rootNode.Size.x, cutPosY);
@@ -193,11 +191,10 @@ public class DungeonGeneration : MonoBehaviour
         hallways = new List<GameObject>();
         hallwayList = new List<Hallway>();
 
-        //TODO: Multiple iteartions of creating hallways
         RoomNode roomStart;
         RoomNode roomEnd;
 
-        //TODO: Fix issues where too many hallways are spwaned
+        //TODO: Fix issues where hallways going backwards have a big gap
         //TODO: Connect hallways together from the same parent to reduce the amount of overlap
         for (int i = 0; i < roomList.Count - 1; i++)
         {
@@ -309,6 +306,13 @@ public class DungeonGeneration : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Spawn in a hallway.
+    /// </summary>
+    /// <param name="width">Width of hallways.</param>
+    /// <param name="startLoc">Start location of hallway.</param>
+    /// <param name="endLoc">End location of hallway.</param>
+    /// <param name="xFirst">Spawn on x axis first.</param>
     private void SpawnHallways(int width, Vector2Int startLoc, Vector2Int endLoc, bool xFirst)
     {
         //Get start point and distance to travel in x and y
@@ -379,12 +383,11 @@ public class DungeonGeneration : MonoBehaviour
         points.Add(endPoint);
     }
 
-    //TODO: Add A* path finding to see if it is possible to complete the dungeon
-    // Could use unity agents to complete this
-    //TODO: Check through points and rooms they are in to see if they are connected
     /// <summary>
-    /// Check path betwene start and end point.
+    /// Check wether the dungeon can be completed.
     /// </summary>
+    /// <param name="start">StartPoint gameobject.</param>
+    /// <param name="end">EndPoint gameobject.</param>
     private void CheckPath(GameObject start, GameObject end)
     {
         StartingPoint startPoint = start.GetComponent<StartingPoint>();

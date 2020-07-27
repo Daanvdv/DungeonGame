@@ -10,13 +10,6 @@ public class Hallway : Node
     public List<Hallway> ConnectedHallways { get; set; }
     public List<RoomNode> ConnectedRooms { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="size"></param>
-    /// <param name="depthIndex"></param>
-    /// <param name="parent"></param>
     public Hallway(Vector2Int startPoint, Vector2Int endPoint, bool xFirst, Node parent) : base(parent)
     {
         this.StartPoint = startPoint;
@@ -27,11 +20,19 @@ public class Hallway : Node
         ConnectedRooms = new List<RoomNode>();
     }
 
+    /// <summary>
+    /// Connect hallway nodes.
+    /// </summary>
+    /// <param name="other">Other hallway.</param>
     public void ConnectHallway(Hallway other)
     {
         ConnectedHallways.Add(other);
     }
 
+    /// <summary>
+    /// Connect room nodes to hallaway.
+    /// </summary>
+    /// <param name="room">Room to connect.</param>
     public void ConnectRoom(RoomNode room)
     {
         ConnectedRooms.Add(room);

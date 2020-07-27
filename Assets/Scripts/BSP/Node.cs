@@ -20,10 +20,19 @@ public class Node
         }
     }
 
+    /// <summary>
+    /// Add child node.
+    /// </summary>
+    /// <param name="node">Child node to add.</param>
     public void AddChild(Node node)
     {
         ChildNodesList.Add(node);
     }
+
+    /// <summary>
+    /// Remove child node.
+    /// </summary>
+    /// <param name="node">Child node to remove.</param>
     public void RemoveChild(Node node)
     {
         ChildNodesList.Remove(node);
