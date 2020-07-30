@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Base node class used for storing data from nodes
 public class Node
 {
     public List<Node> ChildNodesList { get; }

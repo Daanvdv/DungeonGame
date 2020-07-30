@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Info script for hallway info of spawned in hallways
 public class HallwayInfo : MonoBehaviour
 {
     [Header("Info")]

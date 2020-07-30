@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Basic room node based off node to store room based data
 public class RoomNode : Node
 {
     public Vector2Int Position { get; set; }

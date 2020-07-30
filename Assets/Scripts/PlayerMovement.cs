@@ -25,9 +25,11 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //I decided to work with the controller movement for smoother movement and more compatiblity
         movement = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
         controller.Move(movement * Time.deltaTime * movementSpeed);
 
+        //To ensure the camera moved as I wanted it (only on x and y) I made it seperate from the player and took the x and y values to move the camera
         cam.transform.position = new Vector3(this.transform.position.x, cam.transform.position.y, this.transform.position.z);
     }
 }

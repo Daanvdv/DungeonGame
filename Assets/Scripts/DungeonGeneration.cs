@@ -24,6 +24,7 @@ public class DungeonGeneration : MonoBehaviour
     public int roomOffsetSize;
     public int hallwayIteratioons;
 
+    //Interal usuage
     private List<Node> nodeList;
     private List<RoomNode> roomList;
     private List<Hallway> hallwayList;
@@ -41,6 +42,9 @@ public class DungeonGeneration : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //I decided to make each part into diffrent sections to allow myself to work better on
+        // implementation on a step by step basis as well as allowing me to later on move the 
+        // functions elswhere if needed.
         UnityEngine.Random.InitState(seed);
         GenerateDungeon(dungeonSize, maxIterations, minRoomSize);
         CreateRooms(minRoomSize);
@@ -75,7 +79,7 @@ public class DungeonGeneration : MonoBehaviour
             Vector2Int nodeTwoSize;
 
             //Choose wether to split on x or y axis
-            //Crude, refactor
+            //TODO: Refactor and make less janky
             CutType cutType;
 
             if (rootNode.Size.x > rootNode.Size.y)
@@ -144,7 +148,6 @@ public class DungeonGeneration : MonoBehaviour
     /// <param name="minimumSize">Minium size of rooms.</param>
     private void CreateRooms(Vector2Int minimumSize)
     {
-        //Spawn rooms as planes
         rooms = new List<GameObject>();
 
         //TODO: Fix issues where rooms will be right up next to each other with bigger room sizes and smaller overall spaces
@@ -199,6 +202,7 @@ public class DungeonGeneration : MonoBehaviour
                 continue;
             }
 
+            //Calulcate the start points of the hallway
             Vector2Int startLoc = new Vector2Int(
                 roomStart.Position.x + roomStart.Size.x,
                 UnityEngine.Random.Range(roomStart.Position.y, roomStart.Position.x + roomStart.Size.y));
@@ -227,6 +231,7 @@ public class DungeonGeneration : MonoBehaviour
             roomEnd.Visited = true;
         }
 
+        //Keep track of the hallway count to not loop over them again later leading to a shorter for loop
         int firstStageHallwayCount = hallwayList.Count;
 
         //Make connections between hallways
@@ -235,6 +240,7 @@ public class DungeonGeneration : MonoBehaviour
             Hallway hallwayStart = hallwayList[i - 1];
             Hallway hallwayEnd = hallwayList[i];
 
+            //Pick start and end locations using the distance between the hallways
             Vector2Int startLoc = new Vector2Int(
                 hallwayStart.StartPoint.x + (hallwayStart.EndPoint.x - hallwayStart.StartPoint.x) / 2,
                 hallwayStart.EndPoint.y);
@@ -242,6 +248,7 @@ public class DungeonGeneration : MonoBehaviour
                 hallwayEnd.StartPoint.x + (hallwayEnd.EndPoint.x - hallwayEnd.StartPoint.x) / 2,
                 hallwayEnd.StartPoint.y);
 
+            //Save connected rooms to hallway node
             Hallway hallway = new Hallway(startLoc, endLoc, true, hallwayStart);
             foreach (var room in hallwayStart.ConnectedRooms)
             {
@@ -272,6 +279,7 @@ public class DungeonGeneration : MonoBehaviour
                 continue;
             }
 
+            //Pick start and end locations using the distance between the hallways
             Vector2Int startLoc = new Vector2Int(
                 hallwayStart.StartPoint.x + (hallwayStart.EndPoint.x - hallwayStart.StartPoint.x) / 2,
                 hallwayStart.EndPoint.y);
@@ -279,6 +287,7 @@ public class DungeonGeneration : MonoBehaviour
                 hallwayEnd.StartPoint.x + (hallwayEnd.EndPoint.x - hallwayEnd.StartPoint.x) / 2,
                 hallwayEnd.StartPoint.y);
 
+            //Save connected rooms to hallway node
             Hallway hallway = new Hallway(startLoc, endLoc, true, hallwayStart);
             foreach (var room in hallwayStart.ConnectedRooms)
             {
@@ -299,7 +308,7 @@ public class DungeonGeneration : MonoBehaviour
     }
 
     /// <summary>
-    /// Spawn in a hallway.
+    /// Spawn in a hallway using hallway prefab.
     /// </summary>
     /// <param name="width">Width of hallways.</param>
     /// <param name="startLoc">Start location of hallway.</param>
@@ -352,6 +361,7 @@ public class DungeonGeneration : MonoBehaviour
         RoomNode roomEnd = roomList[roomList.Count - 1];
 
         //Get a random spot from a room
+        //TODO: Pick random spot between room using wall width to spawn within the room
         Vector2Int startPos = new Vector2Int(
             roomStart.Position.x,
             roomStart.Position.y);
@@ -359,6 +369,7 @@ public class DungeonGeneration : MonoBehaviour
             roomEnd.Position.x,
             roomEnd.Position.y);
 
+        //TODO: Save start and end points in nodes as well
         GameObject startPoint = Instantiate(startPrefab,
             new Vector3(startPos.x, startPrefab.transform.position.x, startPos.y),
             startPrefab.transform.rotation,
@@ -392,6 +403,9 @@ public class DungeonGeneration : MonoBehaviour
 
         int connections = 0;
 
+        //Search for connections between the start and end point
+        //Due to my lack of knowledge of AI in unity as well as issues with the visualisation I was unable to use
+        //AI agnets to check if the path is able to be completed like I wanted
         foreach (Hallway hallway in hallwayList)
         {
             if (hallway.ConnectedRooms.Contains(startRoom) && hallway.ConnectedRooms.Contains(endRoom))
