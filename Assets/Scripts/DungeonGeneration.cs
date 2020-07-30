@@ -31,6 +31,7 @@ public class DungeonGeneration : MonoBehaviour
     private List<GameObject> hallways;
     private List<GameObject> points;
 
+    //Used for BSP cutting
     enum CutType
     {
         x = 2048,
@@ -312,7 +313,9 @@ public class DungeonGeneration : MonoBehaviour
         int hallwayOneEnd = startLoc.x + roomDistance.x;
 
         //Create hallway sepertly through taxicab geometry (first go via x then y)
+        //I decided to use taxicab geomerty as it was simple and quick and would fit in well with the structure
         //TODO: Add overlap reduction with room spaces
+        //TODO: Fix backwards gap issues
         GameObject hallwayOne = Instantiate(hallwayPrefab,
             new Vector3(startLoc.x, hallwayPrefab.transform.position.y, startLoc.y),
             hallwayPrefab.transform.rotation,
